@@ -3,6 +3,11 @@
 把你本机 `~/.workbuddy/projects/**/*.jsonl` 里的真实用量读出来，做成一个可交互的看板：
 各模型 Token 用量、缓存命中、真实计费、时间分布、工作空间/会话下钻。
 
+![看板首屏](submission/02-hero.png)
+
+**在线演示** → https://token-dashboard-workbuddy.app.workbuddy.host/?sharecode=OFWEUQ52C7
+（线上跑的是内置的脱敏示例数据；想看自己的真实数据，选「浏览器读取」或把日志文件夹拖进页面）
+
 **数据全程只在本机流转**——服务端只监听 `127.0.0.1`，页面不请求任何外部地址（已用冒烟测试断言）。
 
 > 项目位置：`D:\Software\token-dashboard`
