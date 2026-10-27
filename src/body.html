@@ -1,0 +1,158 @@
+<header>
+  <div>
+    <h1>WorkBuddy Token 消耗看板</h1>
+    <div class="sub"><span id="genAt"></span></div>
+  </div>
+  <div class="hd-right">
+    <button class="rbtn ghost" id="backBtn" type="button" title="返回数据源选择">← 数据源</button>
+    <button class="tbtn" id="themeBtn" type="button" title="切换深色/浅色主题" aria-label="切换主题">
+      <svg class="tbtn-ico tbtn-sun" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><line x1="12" y1="2.5" x2="12" y2="4.8"/><line x1="12" y1="19.2" x2="12" y2="21.5"/><line x1="2.5" y1="12" x2="4.8" y2="12"/><line x1="19.2" y1="12" x2="21.5" y2="12"/><line x1="5.3" y1="5.3" x2="6.9" y2="6.9"/><line x1="17.1" y1="17.1" x2="18.7" y2="18.7"/><line x1="5.3" y1="18.7" x2="6.9" y2="17.1"/><line x1="17.1" y1="6.9" x2="18.7" y2="5.3"/></svg>
+      <svg class="tbtn-ico tbtn-moon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.8 6.8 0 0 0 9.8 9.8z"/></svg>
+    </button>
+    <button class="rbtn" id="rescanBtn" type="button" title="重新扫描日志（走增量缓存，很快）">
+      <svg class="rbtn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>重新扫描</button>
+    <button class="rbtn ghost" id="reselectBtn" type="button" title="换一个日志目录">
+      <svg class="rbtn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M3 7.5A1.5 1.5 0 0 1 4.5 6h4l1.6 1.8H19.5A1.5 1.5 0 0 1 21 9.3v7.2A1.5 1.5 0 0 1 19.5 18h-15A1.5 1.5 0 0 1 3 16.5z"/></svg><span id="reselectTxt">重选目录</span></button>
+    <button class="rbtn ghost" id="autoBtn" type="button" title="每 5 分钟自动重新扫描" aria-label="每5分钟自动刷新数据">
+      <svg class="rbtn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><circle cx="12" cy="12" r="8.2"/><polyline points="12 7.8 12 12 15.2 13.8"/></svg>自动刷新</button>
+    <button class="pill" data-w="1">1 天</button>
+    <button class="pill" data-w="3">3 天</button>
+    <button class="pill" data-w="7">近 7 天</button>
+    <button class="pill on" data-w="30">近 30 天</button>
+    <button class="pill" data-w="0">全部</button>
+    <input type="date" id="dStart" class="datepick" title="起始日期">
+    <span class="dsep" style="color:var(--t4);font-size:11px;margin:0 2px">至</span>
+    <input type="date" id="dEnd" class="datepick" title="结束日期">
+  </div>
+</header>
+
+<!-- ============ 引导页：三选一 ============ -->
+<div id="intro" class="intro-card">
+  <h1>WorkBuddy Token 消耗看板</h1>
+  <p>统计各模型的 Token 用量、缓存命中与计费。<b>先选一种数据来源</b>，不会自动加载任何数据。</p>
+
+  <div class="modebox" id="modeServer">
+    <h3><span class="dot off" id="srvDot"></span>① 本机服务<span class="mtag" id="srvTag"></span></h3>
+    <p id="srvDesc">正在探测本地服务…</p>
+    <button class="scan-btn alt sm" id="scanServerBtn" type="button" disabled>读取本机日志</button>
+  </div>
+
+  <div class="modebox" id="modeBrowser">
+    <h3><span class="dot"></span>② 浏览器读取</h3>
+    <p>选择 WorkBuddy 日志目录，或把文件夹直接拖进页面。全部在浏览器内解析，内容不上传。</p>
+    <div class="path-row">
+      <span class="path-label">日志目录</span>
+      <code id="defPath">~/.workbuddy/projects</code>
+      <button class="copy-btn" id="copyPathBtn" type="button">复制路径</button>
+    </div>
+    <button class="scan-btn sm" id="scanBtn" type="button">选择日志目录</button>
+    <input type="file" id="dirInput" webkitdirectory multiple directory style="display:none">
+  </div>
+
+  <div class="modebox" id="modeDemo">
+    <h3><span class="dot off" id="demoDot"></span>③ 查看示例数据<span class="mtag" id="demoTag"></span></h3>
+    <p>用一份脱敏的示例日志预览完整看板，不需要读取任何本地文件，也不含任何个人内容。</p>
+    <button class="scan-btn alt sm" id="demoBtn" type="button" disabled>查看示例</button>
+  </div>
+
+  <div class="intro-note" id="scanStatus"></div>
+  <div class="intro-note">推荐 Chrome / Edge。Windows 下选目录先按 <b>Alt → V → H</b> 显示隐藏文件夹，否则看不到 <code>.workbuddy</code>。</div>
+</div>
+
+<!-- ============ 看板 ============ -->
+<div id="dash" style="display:none">
+  <div class="demo-bar" id="demoBar">
+    <div class="demo-row">
+      <div class="db-main"><b>当前是示例数据</b> · 想看你自己电脑上的真实用量？</div>
+      <button class="rbtn accent" id="demoLocalBtn" type="button">读取我的日志</button>
+      <span class="db-sub">也可以把整个文件夹直接拖进页面</span>
+    </div>
+    <div class="demo-row">
+      <span class="db-sub">默认日志目录</span>
+      <code class="db-path" id="demoPath">%USERPROFILE%\.workbuddy\projects</code>
+      <button class="copy-btn sm" id="copyDemoPath" type="button">复制路径</button>
+      <span class="db-sub">Windows 下该目录默认隐藏，选目录时按 Alt → V → H 显示</span>
+    </div>
+  </div>
+
+  <section class="kpis" id="kpis"></section>
+
+  <div class="hero-grid">
+    <section class="card hero" id="mtCard">
+      <div class="sec-h"><h2>模型总量排行</h2><span class="caption" id="mtCap" style="margin:0"></span></div>
+      <svg id="mtSvg" width="100%" height="150"></svg>
+      <div class="hint">总量 = 该模型当前窗口内累计 Token · 条形按模型间相对占比 · 悬停看精确值与占比</div>
+    </section>
+    <section class="card hero" id="mcCard">
+      <div class="sec-h"><h2>模型积分排行</h2><span class="caption" id="mcCap" style="margin:0"></span></div>
+      <svg id="mcSvg" width="100%" height="150"></svg>
+      <div class="hint">积分 = 日志 credit 字段累计（真实计费）· 条形按模型间相对占比 · 悬停看精确值与占比</div>
+    </section>
+    <section class="card hero" id="mvCard">
+      <div class="sec-h"><h2>模型性价比排行</h2><span class="caption" id="mvCap" style="margin:0"></span></div>
+      <svg id="mvSvg" width="100%" height="150"></svg>
+      <div class="hint">性价比 = Token ÷ Credit（每 1 积分换来的 Token，越大越划算）· 仅统计有 credit 记录的模型</div>
+    </section>
+  </div>
+
+  <div class="mid-grid">
+    <section class="card" id="mdCard">
+      <div class="sec-h"><h2>单次请求大小分布</h2><span class="caption" id="mdCap" style="margin:0"></span></div>
+      <svg id="mdSvg" width="100%" height="240"></svg>
+      <div class="hint">每模型一条分布形状（各自归一）· 竖线 = 该模型 50% · 灰点 = 90% · 虚线 = 全局 50% · 下方条形 = 该模型 50% / 90% 的绝对量级</div>
+    </section>
+
+    <section class="card">
+      <div class="sec-h"><h2>每日模型用量比例</h2></div>
+      <svg id="dmSvg" width="100%" height="102"></svg>
+      <div class="hint">x = 日期（最新在右）· y = 当日 Token · 颜色 = 模型 · 点击下方模型卡片可高亮单模型</div>
+      <section class="kpis top5" id="top5"></section>
+    </section>
+
+    <section class="card" id="rdCard">
+      <div class="sec-h"><h2>0–24 时分布 · 按模型</h2><div class="legend" id="rdLegend" style="flex-wrap:wrap;justify-content:flex-end"></div></div>
+      <svg id="rdSvg" width="100%" height="112"></svg>
+      <div class="hint">y 轴对数刻度 · 每条曲线 = 一个模型在一天各小时的用量形状 · 点击图例可只看某个模型</div>
+    </section>
+  </div>
+
+  <div class="bot-grid">
+    <section class="card" id="wsCard">
+      <div class="sec-h">
+        <h2 class="fold-t">工作空间活跃分布<span class="chev">▾</span></h2>
+        <div class="tools" id="wsTools">
+          <button class="chip" data-m="ses">按会话</button>
+          <button class="chip on" data-m="ws">按工作空间</button>
+          <input id="wsSearch" placeholder="搜索…">
+          <span id="wsSorts" style="display:none">
+            <button class="chip on" data-s="tt">按 Token</button>
+            <button class="chip" data-s="n">按会话数</button>
+          </span>
+          <select id="wsMult" class="wsn" title="时间粒度倍率：一行方块数 = 窗口天数 × 倍率">
+            <option value="1">1X</option><option value="2">2X</option>
+            <option value="3" selected>3X</option><option value="4">4X</option><option value="6">6X</option>
+          </select>
+        </div>
+      </div>
+      <div class="fold-body">
+        <div class="crumb" id="crumb"></div>
+        <div class="panel-scroll"><div id="panel"></div></div>
+        <div class="hint">每行 = 一个工作空间/会话；色块 = 该时段 Token（一行 <span id="multHint">3</span> 格/天，颜色越深用量越大，灰=无数据）· 点击下钻</div>
+      </div>
+    </section>
+
+    <section class="card" id="heatCard">
+      <div class="sec-h"><h2 class="fold-t">日活分布<span class="chev">▾</span></h2><div class="legend" id="heatLegend"></div></div>
+      <div class="fold-body">
+        <div class="band4" id="band4"></div>
+        <div class="hhead" id="hhead"></div>
+        <div class="heat-wrap" id="heatWrap"></div>
+        <div class="hint">横轴 = 一天 24 小时（每格 20 分钟）· 纵轴 = 日期（最新在最上）· 色阶锚定窗口日均</div>
+      </div>
+    </section>
+  </div>
+
+  <div class="foot" id="footNote"></div>
+</div>
+
+<div id="tip"></div>

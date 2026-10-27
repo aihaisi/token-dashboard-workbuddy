@@ -1,0 +1,18 @@
+# 本地/工具产物
+__pycache__/
+*.pyc
+__pycache__
+.workbuddy/
+.playwright-cli/
+*.genie
+.wbapp_*
+
+# 真实日志快照（含个人内容，绝不入库；示例数据请用 demo-scan.json）
+_raw-scan.json
+
+# 编辑器与系统
+node_modules/
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
